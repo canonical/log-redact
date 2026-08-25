@@ -1,10 +1,10 @@
 # log-redact
 
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/log-redact)
 Redact IPs, hostnames, MAC addresses, emails and credentials from text
 files (logs, configuration files, support bundles) before sharing them
 publicly - opening a bug report, posting to a forum, or attaching output
 to a support ticket.
-
 No third-party dependencies. Pure Python 3 standard library.
 
 ## What it detects
@@ -16,17 +16,17 @@ No third-party dependencies. Pure Python 3 standard library.
 | MAC addresses     | `00:1A:2B:3C:4D:5E`                                                                                                            | `[REDACTED-MAC]`        |
 | Emails            | `user@example.com`                                                                                                             | `[REDACTED-EMAIL]`      |
 | Credentials       | AWS keys, GitHub/Slack tokens, JWTs, `Bearer <token>`, PEM private keys, `password=`/`api_key:`/`secret=`/`token:` assignments | `[REDACTED-CREDENTIAL]` |
-
 Redaction is fixed/simple: no numbering, no reversible mapping file. The
 original file is **never modified** - a new file with a `.redacted`
 suffix is written next to it (unless `--stdout` is used).
-
 Timestamps (e.g. `14:32:10`) are correctly distinguished from IPv6
 addresses and are left untouched.
 
 ## Install
 
 ### Snap (recommended, any Ubuntu / most Linux distros)
+
+Published and available now on the [Snap Store](https://snapcraft.io/log-redact):
 
 ```bash
 sudo snap install log-redact
@@ -60,17 +60,13 @@ python3 -m redact file.log
 ```bash
 # Redact a single file -> writes file.log.redacted
 redact file.log
-
 # Multiple files at once
 redact *.log config.yaml
-
 # Additional client-specific domains not covered by the generic
 # hostname pattern (custom TLDs, or to explicitly scope an engagement)
 redact file.log --domain client.example --domain internal.client.net
-
 # Print to stdout instead of writing a file (useful for piping/reviewing)
 redact file.log --stdout
-
 # Custom output suffix
 redact file.log --suffix .clean
 ```
@@ -116,14 +112,13 @@ exact combination (offline stdlib-only CLI, fixed placeholders with no
 reversible mapping file, per-engagement `--domain` scoping, packaged as a
 snap), but they're worth knowing about:
 
-| Project                                                                                                           | Type                | Notes                                                                                                                                                                                                                                                                                                                                                               |
-|-------------------------------------------------------------------------------------------------------------------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [hiranp/log-redactor](https://github.com/hiranp/log-redactor)                                                     | CLI (Python + Rust) | Closest in spirit. Also redacts URLs, phone numbers, names; supports PDFs and tar/zip archives; interactive confirm mode; rules kept in `secrets.json`/`ignores.json`. Keeps a reversible `redacted-mapping.txt` by default.                                                                                                                                        |
-| [Splunk support-scripts/log-redactor](https://github.com/splunk/support-scripts/blob/main/log-redactor/README.md) | CLI (Python)        | Built for sanitizing Splunk diag bundles before sending to support. Uses **consistent per-value IDs** (`[REDACTED-IP-482910]`) with optional mapping export (`--json-export`/`--csv-export`) - the numbered+reversible model this project deliberately avoids.                                                                                                    |
-| [python-log-redactor](https://pypi.org/project/python-log-redactor)                                               | Python library      | Not a standalone file CLI - designed to hook into `logging` (a `RedactingFilter`) and redact dicts/strings inline in application code.                                                                                                                                                                                                                              |
-| [LogShield](https://logshield.dev) / `logshield-cli`                                                              | CLI (Node)          | Deterministic, offline, stdin/stdout pipeline (`cat app.log \| logshield scan`), `--fail-on-detect` for CI gating. Good overlap on vendor-token coverage (AWS, GitHub, Slack, npm, Stripe). Note: the PyPI package `logshield` is a *different*, hosted product that sends text to a RapidAPI backend - only the `logshield-cli` npm package is fully local. |
-| [Log Redactor (jsondevtools.org)](https://jsondevtools.org/log-redactor.html)                                     | Browser tool        | Paste-in web page, client-side JS only, no upload. Not a CLI, doesn't fit a terminal/scripted workflow.                                                                                                                                                                                                                                                             |
-
+| Project | Type | Notes |
+|---|---|---|
+| [hiranp/log-redactor](https://github.com/hiranp/log-redactor) | CLI (Python + Rust) | Closest in spirit. Also redacts URLs, phone numbers, names; supports PDFs and tar/zip archives; interactive confirm mode; rules kept in `secrets.json`/`ignores.json`. Keeps a reversible `redacted-mapping.txt` by default. |
+| [Splunk support-scripts/log-redactor](https://github.com/splunk/support-scripts/blob/main/log-redactor/README.md) | CLI (Python) | Built for sanitizing Splunk diag bundles before sending to support. Uses **consistent per-value IDs** (`[REDACTED-IP-482910]`) with optional mapping export (`--json-export`/`--csv-export`) - the numbered+reversible model this project deliberately avoids. |
+| [python-log-redactor](https://pypi.org/project/python-log-redactor) | Python library | Not a standalone file CLI - designed to hook into `logging` (a `RedactingFilter`) and redact dicts/strings inline in application code. |
+| [LogShield](https://logshield.dev) / `logshield-cli` | CLI (Node) | Deterministic, offline, stdin/stdout pipeline (`cat app.log \| logshield scan`), `--fail-on-detect` for CI gating. Good overlap on vendor-token coverage (AWS, GitHub, Slack, npm, Stripe). Note: the PyPI package `logshield` is a *different*, hosted product that sends text to a RapidAPI backend - only the `logshield-cli` npm package is fully local. |
+| [Log Redactor (jsondevtools.org)](https://jsondevtools.org/log-redactor.html) | Browser tool | Paste-in web page, client-side JS only, no upload. Not a CLI, doesn't fit a terminal/scripted workflow. |
 If a future need comes up for PDF or archive redaction, `hiranp/log-redactor`
 is the most likely tool to reach for instead of extending this one.
 
@@ -134,3 +129,53 @@ git clone https://github.com/msmarcal/log-redact.git
 cd log-redact
 python3 -m unittest discover -s tests -v
 ```
+
+## Publishing to the Snap Store
+
+This project already publishes automatically via GitHub Actions (see
+below) - these manual steps are documented for reference or for setting
+up a fork/new machine from scratch.
+Requires an Ubuntu machine (or LXD/multipass) with `snapcraft` installed,
+and a registered Ubuntu One account.
+
+```bash
+sudo snap install snapcraft --classic
+# Log in (only needed once per machine)
+snapcraft login
+# Register the name "log-redact" in the Snap Store (one-time; check first
+# with `snapcraft search log-redact` in case it's since been taken)
+snapcraft register log-redact
+# Build the snap locally
+snapcraft
+# Manual upload + release to a channel
+snapcraft upload --release=edge log-redact_1.0.0_amd64.snap
+```
+
+### Automated releases via GitHub Actions
+
+The `.github/workflows/snap.yml` workflow builds the snap on every push
+and pull request (as a downloadable artifact), and automatically
+publishes to the Snap Store:
+
+- Every push to `main`/`master` releases the built snap to the **edge**
+  channel.
+- Pushing a `vX.Y.Z` tag releases it to the **stable** channel.
+This requires a repo secret named `SNAPCRAFT_STORE_CREDENTIALS`,
+generated once with:
+
+```bash
+snapcraft export-login --snaps=log-redact --channels=edge,beta,candidate,stable -
+```
+
+and saved under Settings -> Secrets and variables -> Actions -> New
+repository secret. (Already configured for this repository.)
+To cut a new stable release:
+
+```bash
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+## License
+
+MIT - see [LICENSE](LICENSE).
