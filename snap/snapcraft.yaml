@@ -1,0 +1,58 @@
+name: log-redact
+base: core22
+version: '1.0.0'
+summary: Redact IPs, hostnames, MACs, emails and credentials from text files
+description: |
+  redact scans text files (logs, configuration files, support bundles) and
+  replaces sensitive data with placeholder tags before you share them
+  publicly - for example when opening a bug report, posting to a forum, or
+  attaching output to a support ticket.
+
+  Detected and redacted by default:
+    * IPv4 and IPv6 addresses (all common notations, including compressed
+      and loopback forms)
+    * MAC addresses
+    * Email addresses
+    * Hostnames / FQDNs (generic TLD/suffix detection, e.g. .com, .net,
+      .internal, .local, .corp, .lan, .intranet, .io, .dev, .cloud, ...)
+    * Credentials: AWS access keys, GitHub/Slack tokens, JWTs, Bearer
+      tokens, PEM private key blocks, and password/api_key/secret/token
+      assignments in config files
+
+  You can also pass one or more --domain flags to redact client-specific
+  domains that aren't covered by the generic hostname detection (useful
+  when working across multiple client engagements with different internal
+  domains).
+
+  The original file is never modified - a new file with a .redacted
+  suffix is written next to it (or output goes to stdout with --stdout).
+
+  Usage:
+    redact file.log
+    redact *.log config.yaml
+    redact file.log --domain client.example --domain internal.client.net
+    redact file.log --stdout
+
+grade: stable
+confinement: strict
+license: MIT
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+apps:
+  redact:
+    command: bin/redact
+    plugs:
+      - home
+      - removable-media
+
+parts:
+  redact:
+    plugin: python
+    source: .
+    python-packages:
+      - .
+    stage-packages:
+      - python3-venv

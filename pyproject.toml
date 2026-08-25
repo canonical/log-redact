@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "redact"
+version = "1.0.0"
+description = "Redact IPs, hostnames, MACs, emails and credentials from text files before sharing them publicly."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+    { name = "Marcelo Marçal" }
+]
+keywords = ["redaction", "security", "logs", "sanitize", "privacy", "cli"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+    "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/msmarcal/redact"
+Issues = "https://github.com/msmarcal/redact/issues"
+
+[project.scripts]
+redact = "redact.cli:main"
+
+[tool.setuptools]
+packages = ["redact"]

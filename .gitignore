@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Virtual envs
+.venv/
+venv/
+
+# Snapcraft build artifacts
+*.snap
+parts/
+stage/
+prime/
+snap/.snapcraft/
+
+# Redaction output / scratch test files (never commit real logs/configs)
+*.redacted
+*.redacted.map.json
+
+# OS / editor cruft
+.DS_Store
+*.swp
+.idea/
+.vscode/
