@@ -2,10 +2,10 @@ name: Snap build
 
 on:
   push:
-    branches: [main]
-    tags: ['v*']
+    branches: [main, master]
+    tags: ["v*"]
   pull_request:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch: {}
 
 jobs:
@@ -21,28 +21,28 @@ jobs:
       - name: Upload snap artifact
         uses: actions/upload-artifact@v4
         with:
-          name: redact-snap
+          name: log-redact-snap
           path: ${{ steps.build.outputs.snap }}
 
       # Publishing to the Snap Store requires SNAPCRAFT_STORE_CREDENTIALS
       # (a repo secret) generated locally with:
-      #   snapcraft export-login --snaps=redact --channels=edge,beta,candidate,stable -
+      #   snapcraft export-login --snaps=log-redact --channels=edge,beta,candidate,stable -
       # Uncomment once the secret is configured and the repo is ready to
       # publish (see the "Publishing to the Snap Store" section in README).
-      # - name: Release to edge channel
-      #   if: github.ref == 'refs/heads/main'
-      #   uses: snapcore/action-publish@v1
-      #   env:
-      #     SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
-      #   with:
-      #     snap: ${{ steps.build.outputs.snap }}
-      #     release: edge
-      #
-      # - name: Release tagged version to stable channel
-      #   if: startsWith(github.ref, 'refs/tags/v')
-      #   uses: snapcore/action-publish@v1
-      #   env:
-      #     SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
-      #   with:
-      #     snap: ${{ steps.build.outputs.snap }}
-      #     release: stable
+      - name: Release to edge channel
+        if: github.ref == 'refs/heads/master'
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: edge
+
+      - name: Release tagged version to stable channel
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: stable
